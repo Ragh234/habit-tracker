@@ -113,7 +113,8 @@ private fun HabitRow(
             Column(modifier = Modifier.weight(1f)) {
                 Text(summary.habit.name, style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = summary.habit.targetPerWeek.toString() + "x per week",
+                    text = streakLabel(summary.currentStreak) +
+                        "  ·  " + summary.habit.targetPerWeek + "x per week",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -163,4 +164,10 @@ private fun AddHabitDialog(
             TextButton(onClick = onDismiss) { Text("Cancel") }
         }
     )
+}
+
+private fun streakLabel(streak: Int): String = when (streak) {
+    0 -> "No streak"
+    1 -> "1 day streak"
+    else -> streak.toString() + " day streak"
 }

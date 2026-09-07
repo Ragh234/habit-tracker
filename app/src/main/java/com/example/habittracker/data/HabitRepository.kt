@@ -3,6 +3,7 @@ package com.example.habittracker.data
 import com.example.habittracker.data.local.CheckInEntity
 import com.example.habittracker.data.local.HabitDao
 import com.example.habittracker.data.local.HabitEntity
+import com.example.habittracker.domain.StreakCalculator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import java.time.LocalDate
@@ -12,7 +13,8 @@ import javax.inject.Singleton
 /** A habit plus the derived state the list needs, so the UI does no date maths. */
 data class HabitSummary(
     val habit: HabitEntity,
-    val doneToday: Boolean
+    val doneToday: Boolean,
+    val currentStreak: Int
 )
 
 @Singleton
@@ -42,7 +44,11 @@ class HabitRepository @Inject constructor(
                 val dates = datesByHabit[habit.id].orEmpty().map { it.date }
                 HabitSummary(
                     habit = habit,
-                    doneToday = todayKey in dates
+                    doneToday = todayKey in dates,
+                    currentStreak = StreakCalculator.currentStreak(
+                        dates = dates.map(LocalDate::parse),
+                        today = today
+                    )
                 )
             }
         }
