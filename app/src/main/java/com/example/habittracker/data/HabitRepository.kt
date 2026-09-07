@@ -61,6 +61,10 @@ class HabitRepository @Inject constructor(
         dao.observeCheckInsForHabit(habitId, since.toString())
             .map { rows -> rows.map { LocalDate.parse(it.date) } }
 
+    /** Used by the reminder worker to decide whether there is anything worth notifying about. */
+    suspend fun habitsNotCheckedOn(date: LocalDate): List<HabitEntity> =
+        dao.habitsNotCheckedOn(date.toString())
+
     suspend fun updateHabit(habit: HabitEntity) = dao.updateHabit(habit)
 
     /** Check-ins go with it: the foreign key on check_ins cascades the delete. */

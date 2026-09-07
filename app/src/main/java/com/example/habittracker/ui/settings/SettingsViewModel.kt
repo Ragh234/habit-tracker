@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.habittracker.data.prefs.ReminderSettings
 import com.example.habittracker.data.prefs.SettingsRepository
+import com.example.habittracker.work.ReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val reminderScheduler: ReminderScheduler
 ) : ViewModel() {
 
     val settings: StateFlow<ReminderSettings> = settingsRepository.settings
@@ -30,6 +32,7 @@ class SettingsViewModel @Inject constructor(
     fun setReminder(enabled: Boolean, hour: Int, minute: Int) {
         viewModelScope.launch {
             settingsRepository.setReminder(enabled, hour, minute)
+            if (enabled) reminderScheduler.schedule(hour, minute) else reminderScheduler.cancel()
         }
     }
 }
