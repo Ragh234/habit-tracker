@@ -37,6 +37,12 @@ android {
     }
 }
 
+// Room writes the schema of every version to this directory. Committing them is what
+// makes MigrationTestHelper able to open an old database and run a migration against it.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
