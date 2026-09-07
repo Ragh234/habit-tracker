@@ -1,9 +1,14 @@
 package com.example.habittracker.ui.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,11 +31,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.habittracker.data.HabitSummary
 import com.example.habittracker.ui.HabitFormDialog
+import com.example.habittracker.ui.toComposeColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,8 +106,8 @@ fun HomeScreen(
             title = "New habit",
             confirmLabel = "Add",
             onDismiss = { showAddDialog = false },
-            onConfirm = { name, target ->
-                viewModel.addHabit(name, target)
+            onConfirm = { name, target, colorHex ->
+                viewModel.addHabit(name, target, colorHex)
                 showAddDialog = false
             }
         )
@@ -119,6 +126,13 @@ private fun HabitRow(
             modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 8.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .clip(CircleShape)
+                    .background(summary.habit.colorHex.toComposeColor())
+            )
+            Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(summary.habit.name, style = MaterialTheme.typography.titleMedium)
                 Text(

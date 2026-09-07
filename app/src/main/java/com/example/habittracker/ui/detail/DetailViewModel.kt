@@ -52,11 +52,15 @@ class DetailViewModel @Inject constructor(
         initialValue = DetailUiState()
     )
 
-    fun updateHabit(name: String, targetPerWeek: Int) {
+    fun updateHabit(name: String, targetPerWeek: Int, colorHex: String) {
         val current = uiState.value.habit ?: return
         viewModelScope.launch {
             repository.updateHabit(
-                current.copy(name = name.trim(), targetPerWeek = targetPerWeek)
+                current.copy(
+                    name = name.trim(),
+                    targetPerWeek = targetPerWeek,
+                    colorHex = colorHex
+                )
             )
         }
     }

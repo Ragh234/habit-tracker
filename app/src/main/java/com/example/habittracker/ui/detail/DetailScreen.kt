@@ -29,10 +29,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.habittracker.ui.HabitFormDialog
+import com.example.habittracker.ui.toComposeColor
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -100,7 +102,8 @@ fun DetailScreen(
             HistoryGrid(
                 start = viewModel.historyStart,
                 days = DetailViewModel.HISTORY_DAYS.toInt(),
-                checkedDates = state.checkedDates
+                checkedDates = state.checkedDates,
+                accent = habit.colorHex.toComposeColor()
             )
         }
     }
@@ -111,9 +114,10 @@ fun DetailScreen(
             confirmLabel = "Save",
             initialName = habit.name,
             initialTargetPerWeek = habit.targetPerWeek,
+            initialColorHex = habit.colorHex,
             onDismiss = { showEdit = false },
-            onConfirm = { name, target ->
-                viewModel.updateHabit(name, target)
+            onConfirm = { name, target, colorHex ->
+                viewModel.updateHabit(name, target, colorHex)
                 showEdit = false
             }
         )
@@ -142,6 +146,7 @@ private fun HistoryGrid(
     start: LocalDate,
     days: Int,
     checkedDates: Set<LocalDate>,
+    accent: Color,
     modifier: Modifier = Modifier
 ) {
     val dates = remember(start, days) {
@@ -155,13 +160,18 @@ private fun HistoryGrid(
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         items(dates, key = { it.toString() }) { date ->
-            DayCell(date = date, checked = date in checkedDates)
+            DayCell(date = date, checked = date in checkedDates, accent = accent)
         }
     }
 }
 
 @Composable
-private fun DayCell(date: LocalDate, checked: Boolean, modifier: Modifier = Modifier) {
+private fun DayCell(
+    date: LocalDate,
+    checked: Boolean,
+    accent: Color,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -177,8 +187,7 @@ private fun DayCell(date: LocalDate, checked: Boolean, modifier: Modifier = Modi
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(6.dp))
                 .background(
-                    if (checked) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.surfaceVariant
+                    if (checked) accent else MaterialTheme.colorScheme.surfaceVariant
                 )
         )
     }

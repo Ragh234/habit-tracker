@@ -31,9 +31,9 @@ class HomeViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    fun addHabit(name: String, targetPerWeek: Int) {
+    fun addHabit(name: String, targetPerWeek: Int, colorHex: String) {
         if (name.isBlank()) return
-        viewModelScope.launch { repository.addHabit(name, targetPerWeek) }
+        viewModelScope.launch { repository.addHabit(name, targetPerWeek, colorHex) }
     }
 
     fun setChecked(habitId: Long, checked: Boolean) {

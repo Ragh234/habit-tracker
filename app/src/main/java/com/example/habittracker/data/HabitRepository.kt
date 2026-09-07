@@ -70,12 +70,13 @@ class HabitRepository @Inject constructor(
     /** Check-ins go with it: the foreign key on check_ins cascades the delete. */
     suspend fun deleteHabit(habitId: Long) = dao.deleteHabit(habitId)
 
-    suspend fun addHabit(name: String, targetPerWeek: Int) {
+    suspend fun addHabit(name: String, targetPerWeek: Int, colorHex: String) {
         dao.insertHabit(
             HabitEntity(
                 name = name.trim(),
                 targetPerWeek = targetPerWeek,
-                createdAt = System.currentTimeMillis()
+                createdAt = System.currentTimeMillis(),
+                colorHex = colorHex
             )
         )
     }
