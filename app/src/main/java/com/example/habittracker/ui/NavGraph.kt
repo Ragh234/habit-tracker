@@ -9,10 +9,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.habittracker.ui.detail.DetailScreen
 import com.example.habittracker.ui.home.HomeScreen
+import com.example.habittracker.ui.settings.SettingsScreen
 
 object Routes {
     const val HOME = "home"
     const val HABIT_DETAIL = "habit/{habitId}"
+    const val SETTINGS = "settings"
 
     fun habitDetail(habitId: Long): String = "habit/$habitId"
 }
@@ -26,7 +28,8 @@ fun HabitTrackerNavHost(
             HomeScreen(
                 onHabitClick = { habitId ->
                     navController.navigate(Routes.habitDetail(habitId))
-                }
+                },
+                onSettingsClick = { navController.navigate(Routes.SETTINGS) }
             )
         }
         composable(
@@ -36,6 +39,9 @@ fun HabitTrackerNavHost(
             arguments = listOf(navArgument("habitId") { type = NavType.LongType })
         ) {
             DetailScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.SETTINGS) {
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
     }
 }
