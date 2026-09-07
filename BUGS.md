@@ -64,3 +64,35 @@ agree.
 
 Caught by reading the exported schema rather than by the test, because the migration test
 is instrumented and needs a device.
+
+---
+
+## 3. Changing the reminder time did not move the reminder
+
+**Symptom**
+
+Set the reminder to 20:00, then changed it to 08:00. The 20:00 run still fired. The new
+time only took effect a cycle later.
+
+**Cause**
+
+`enqueueUniquePeriodicWork` was using `ExistingPeriodicWorkPolicy.UPDATE` for every save.
+UPDATE keeps the work that is already scheduled and swaps the new request in underneath
+it. The pending run had already been scheduled against the old initial delay, and UPDATE
+does not move it, so the schedule stayed on the old time until that run completed and the
+next period was computed.
+
+UPDATE is still the right policy when nothing about the timing changed. The mistake was
+using it unconditionally.
+
+**Fix**
+
+The settings screen now compares the new time against what was already stored and picks
+the policy from that: `CANCEL_AND_REENQUEUE` when the time changed or the reminder was
+just switched on, `UPDATE` otherwise. Cancelling drops the stale pending run so the new
+initial delay is the one that counts.
+
+**Still not verified on a device.** The unique name means this cannot stack duplicate
+workers either way, so the failure is silent: the reminder fires, just at the old time.
+Check it with `adb shell dumpsys jobscheduler` and look at the scheduled run time before
+and after changing the setting.

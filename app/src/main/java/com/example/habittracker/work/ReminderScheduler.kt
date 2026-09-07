@@ -16,18 +16,30 @@ import javax.inject.Singleton
 class ReminderScheduler @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) {
-    fun schedule(hour: Int, minute: Int) {
+    /**
+     * @param restartCycle true when the reminder time itself changed.
+     *
+     * UPDATE keeps the currently scheduled run and swaps the request in underneath it,
+     * which is what you want for a change that does not affect timing. It is the wrong
+     * choice when the time changed, because the pending run was already scheduled against
+     * the old initial delay and UPDATE will not move it. CANCEL_AND_REENQUEUE throws that
+     * pending run away so the new delay takes effect immediately.
+     */
+    fun schedule(hour: Int, minute: Int, restartCycle: Boolean) {
         val request = PeriodicWorkRequestBuilder<ReminderWorker>(1, TimeUnit.DAYS)
             .setInitialDelay(delayUntilMillis(hour, minute), TimeUnit.MILLISECONDS)
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.MINUTES)
             .build()
 
+        val policy = if (restartCycle) {
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE
+        } else {
+            ExistingPeriodicWorkPolicy.UPDATE
+        }
+
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             UNIQUE_WORK_NAME,
-            // UPDATE, not REPLACE. REPLACE cancels the existing work and enqueues a new
-            // request, which restarts the period from now. UPDATE keeps the existing
-            // schedule and swaps the request in place.
-            ExistingPeriodicWorkPolicy.UPDATE,
+            policy,
             request
         )
     }

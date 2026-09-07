@@ -30,9 +30,22 @@ class SettingsViewModel @Inject constructor(
         )
 
     fun setReminder(enabled: Boolean, hour: Int, minute: Int) {
+        val previous = settings.value
+        // Read before the write, so the comparison is against what was actually scheduled.
+        val timeChanged = previous.hour != hour || previous.minute != minute
+        val turnedOn = enabled && !previous.enabled
+
         viewModelScope.launch {
             settingsRepository.setReminder(enabled, hour, minute)
-            if (enabled) reminderScheduler.schedule(hour, minute) else reminderScheduler.cancel()
+            if (!enabled) {
+                reminderScheduler.cancel()
+            } else {
+                reminderScheduler.schedule(
+                    hour = hour,
+                    minute = minute,
+                    restartCycle = timeChanged || turnedOn
+                )
+            }
         }
     }
 }
