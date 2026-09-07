@@ -6,6 +6,7 @@ import com.example.habittracker.data.local.HabitEntity
 import com.example.habittracker.domain.StreakCalculator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -53,6 +54,17 @@ class HabitRepository @Inject constructor(
             }
         }
     }
+
+    fun observeHabit(habitId: Long): Flow<HabitEntity?> = dao.observeHabit(habitId)
+
+    fun observeCheckInDates(habitId: Long, since: LocalDate): Flow<List<LocalDate>> =
+        dao.observeCheckInsForHabit(habitId, since.toString())
+            .map { rows -> rows.map { LocalDate.parse(it.date) } }
+
+    suspend fun updateHabit(habit: HabitEntity) = dao.updateHabit(habit)
+
+    /** Check-ins go with it: the foreign key on check_ins cascades the delete. */
+    suspend fun deleteHabit(habitId: Long) = dao.deleteHabit(habitId)
 
     suspend fun addHabit(name: String, targetPerWeek: Int) {
         dao.insertHabit(
