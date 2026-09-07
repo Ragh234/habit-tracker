@@ -3,6 +3,7 @@ package com.example.habittracker.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.habittracker.data.local.HabitEntity
+import com.example.habittracker.data.HabitSummary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +42,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val habits by viewModel.habits.collectAsStateWithLifecycle()
+    val habits by viewModel.summaries.collectAsStateWithLifecycle()
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
@@ -74,8 +76,13 @@ fun HomeScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(habits, key = { it.id }) { habit ->
-                    HabitRow(habit = habit)
+                items(habits, key = { it.habit.id }) { summary ->
+                    HabitRow(
+                        summary = summary,
+                        onCheckedChange = { checked ->
+                            viewModel.setChecked(summary.habit.id, checked)
+                        }
+                    )
                 }
             }
         }
@@ -93,13 +100,26 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HabitRow(habit: HabitEntity, modifier: Modifier = Modifier) {
+private fun HabitRow(
+    summary: HabitSummary,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(modifier = modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(habit.name, style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = habit.targetPerWeek.toString() + "x per week",
-                style = MaterialTheme.typography.bodySmall
+        Row(
+            modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 8.dp, bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(summary.habit.name, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = summary.habit.targetPerWeek.toString() + "x per week",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Checkbox(
+                checked = summary.doneToday,
+                onCheckedChange = onCheckedChange
             )
         }
     }
